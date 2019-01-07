@@ -58,7 +58,7 @@ public class WebApplicationContext extends HttpServlet implements AbstractApplic
         baseScanPackage = env.getString(BASE_SCAN_PACKAGE_KEY);
 
         if(baseScanPackage == null || "".equals(baseScanPackage.trim())) {
-            throw new Exception("娌℃湁閰嶇疆鎴栭厤缃殑 " + BASE_SCAN_PACKAGE_KEY + "闈炴硶");
+            throw new Exception("can not find application.properties file or attribute: " + BASE_SCAN_PACKAGE_KEY + " not config in application.properties");
         }
     }
 
@@ -181,9 +181,15 @@ public class WebApplicationContext extends HttpServlet implements AbstractApplic
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String contextPath = req.getContextPath();
-        StringBuffer url = req.getRequestURL();
-
-        String reqUrl = url.substring(url.indexOf(contextPath) + contextPath.length() + 1);
+        String url = req.getRequestURL().toString();
+        url = url.substring(url.indexOf("//") + 2);
+        url = url.substring(url.indexOf("/") + 1);
+        String reqUrl = "";
+        if("".equals(contextPath)) {
+            reqUrl = url;
+        } else {
+            reqUrl = url.substring(url.indexOf(contextPath) + contextPath.length() + 1);
+        }
         Method method = context.getMethodMap().get(reqUrl);
         if(method == null) {
             resp.getWriter().append("page not found");

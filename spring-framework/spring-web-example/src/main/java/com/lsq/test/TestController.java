@@ -8,7 +8,7 @@ import com.lsq.web.annotation.RequestMapping;
 @RequestMapping("test")
 public class TestController {
 	@Autowired
-	private TestServices service;
+	private com.lsq.test.TestServices service;
 	
 	@RequestMapping("hello")
 	public String test(){
