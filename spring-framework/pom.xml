@@ -17,7 +17,36 @@
         <module>spring-web</module>
         <module>spring-context</module>
         <module>spring-example</module>
+        <module>spring-web-example</module>
+        
     </modules>
 
+<build>
+        
+        <plugins>
+            <!-- 指定jdk版本 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <!-- 源码的编译器版本 -->
+                    <source>1.8</source>
+                    <!-- class的编译器版本 -->
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- 跳过测试 -->
+                    <skip>true</skip>
+                </configuration>
+                <version>2.18.1</version>
+            </plugin>
+
+        </plugins>
+    </build>
 </project>

@@ -11,7 +11,7 @@ public abstract class AbstractEnvironment implements Environment {
 
     static Properties pro = new Properties();
 
-    String DEFAULT_APP_PROPERTIES_FILENAME = "application.properties";
+    public static final String DEFAULT_APP_PROPERTIES_FILENAME = "application.properties";
 
     /**
      * 加载配置文件
@@ -35,8 +35,10 @@ public abstract class AbstractEnvironment implements Environment {
     }
 
     public void initEnvironment(String appProPath) {
-        if(null == appProPath || "".equals(appProPath.trim()))
-        loadingProperties(DEFAULT_APP_PROPERTIES_FILENAME);
+        if(null == appProPath || "".equals(appProPath.trim())) {
+        	loadingProperties(DEFAULT_APP_PROPERTIES_FILENAME);
+        }
+        loadingProperties(appProPath);
     }
 
 }
