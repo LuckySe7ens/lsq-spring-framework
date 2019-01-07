@@ -1,4 +1,4 @@
-package com.lsq.annotation;
+package com.lsq.context.annotation;
 
 import java.lang.annotation.*;
 
@@ -10,4 +10,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Component
 public @interface Controller {
+    String value() default "";
 }

@@ -1,13 +1,21 @@
-package com.lsq.context.bean;
+package com.lsq.web.annotation;
 
 import com.lsq.context.annotation.Autowired;
 import com.lsq.context.annotation.Component;
 import com.lsq.context.annotation.Controller;
 import com.lsq.context.annotation.Service;
+import com.lsq.context.bean.*;
 import com.lsq.context.utils.StringUtils;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +24,14 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by liushiquan on 2019/1/7.
  */
-public class DefaultApplicationContext implements AbstractApplicationContext {
+public class WebApplicationContext extends HttpServlet implements AbstractApplicationContext {
 
     /**
      * bean容器
      */
     static Map<String,Object> beanMap = new ConcurrentHashMap<String, Object>(16);
+
+    static Map<String,Method> methodMap = new ConcurrentHashMap<String, Method>(16);
 
     private static Environment env;
 
@@ -33,7 +43,7 @@ public class DefaultApplicationContext implements AbstractApplicationContext {
 
     private static String base_scan_path = null;
 
-    private DefaultApplicationContext() {
+    private WebApplicationContext() {
     }
 
     private static void initEnv(String appProPath) throws Exception {
@@ -79,6 +89,19 @@ public class DefaultApplicationContext implements AbstractApplicationContext {
                 } else {
                     beanMap.put(key,instance);
                 }
+                RequestMapping requestMapping = clazz.getAnnotation(RequestMapping.class);
+                String baseUrl = "";
+                if(requestMapping != null) {
+                    baseUrl = requestMapping.value();
+                }
+
+                Method[] methods = clazz.getDeclaredMethods();
+                for (Method method : methods) {
+                    if(method.isAnnotationPresent(RequestMapping.class)) {
+                        RequestMapping reqMapping = method.getAnnotation(RequestMapping.class);
+                        methodMap.put((baseUrl + reqMapping.value()).replaceAll("\\\\+","\\\\"),method);
+                    }
+                }
             } else if(clazz.isAnnotationPresent(Service.class)) {
                 Service component = clazz.getAnnotation(Service.class);
                 String key = component.value();
@@ -106,7 +129,7 @@ public class DefaultApplicationContext implements AbstractApplicationContext {
     }
 
     public static ApplicationContext startUp(String appProperties) throws Exception {
-        context = new DefaultApplicationContext();
+        context = new WebApplicationContext();
         initEnv(appProperties);
         initBean();
         initField();
@@ -143,5 +166,33 @@ public class DefaultApplicationContext implements AbstractApplicationContext {
 
     public List<Object> getBeans(Class<?> clazz) {
         return null;
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String contextPath = req.getContextPath();
+        StringBuffer url = req.getRequestURL();
+
+        String reqUrl = url.substring(contextPath.length() - 1);
+        Method method = methodMap.get(reqUrl);
+        if(method == null) {
+            resp.getWriter().append("访问的url不存在");
+            resp.setStatus(404);
+            resp.flushBuffer();
+        }
+        Map<String, String[]> parameterMap = req.getParameterMap();
+
+        try {
+            method.invoke(beanMap.get(StringUtils.firstlower(method.getDeclaringClass().getSimpleName())),parameterMap.values().toArray());
+        } catch (Exception e) {
+            resp.getWriter().append("服务器内部异常");
+            resp.setStatus(500);
+            resp.flushBuffer();
+        }
     }
 }

@@ -1,11 +1,15 @@
 package com.lsq.context.bean;
 
+import java.util.List;
+
 /**
  * Created by liushiquan on 2019/1/4.
  */
 public interface ApplicationContext {
 
-    String DEFAULT_APP_PROPERTIES_FILENAME = "application.properties";
+    Object getBean(String beanName);
 
-    Object getBean();
+    Object getBean(Class<?> clazz);
+
+    List<Object> getBeans(Class<?> clazz);
 }

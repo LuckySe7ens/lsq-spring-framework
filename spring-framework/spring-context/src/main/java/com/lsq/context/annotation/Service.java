@@ -1,4 +1,4 @@
-package com.lsq.annotation;
+package com.lsq.context.annotation;
 
 import java.lang.annotation.*;
 

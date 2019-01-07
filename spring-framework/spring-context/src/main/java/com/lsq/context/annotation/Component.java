@@ -1,4 +1,4 @@
-package com.lsq.annotation;
+package com.lsq.context.annotation;
 
 import java.lang.annotation.*;
 
@@ -8,6 +8,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Autowired {
+@Inherited
+public @interface Component {
     String value() default "";
 }
